@@ -20,13 +20,25 @@ IN_GAME_SENS = 5
 IGNORE_GYRO_DEVICES = 0x045e:0x028e
 
 GYRO_CUTOFF_SPEED = 0.4
-GYRO_SMOOTHING_DECAY = ON
 GYRO_CUTOFF_RECOVERY = 0.5
+
+# Smoothing. Both of these are required: GYRO_SMOOTH_THRESHOLD defaults to 0,
+# and applyGyroDecaySmoothing returns the raw input unchanged when either the
+# threshold or the time is 0 - so without them GYRO_SMOOTHING_DECAY does
+# nothing at all. GYRO_SMOOTH_TIME also defaults to 0.125s, several times
+# longer than wanted here.
+#
+# With DECAY on, the smoothed portion is g = (1 - speed/threshold)^2: fully
+# smoothed when nearly still, untouched at or above 2 deg/s, quadratic in
+# between. That kills jitter during micro-adjustments without dulling flicks.
+GYRO_SMOOTHING_DECAY = ON
+GYRO_SMOOTH_THRESHOLD = 2
+GYRO_SMOOTH_TIME = 0.04
 
 ROLL_CONTRIBUTION = -100
 MIN_GYRO_SENS = 5 3
-MAX_GYRO_SENS = 20 6
-MIN_GYRO_THRESHOLD = 3
+MAX_GYRO_SENS = 21 6
+MIN_GYRO_THRESHOLD = 0
 ACCEL_CURVE = QUADRATIC
 MAX_GYRO_THRESHOLD = 80
 

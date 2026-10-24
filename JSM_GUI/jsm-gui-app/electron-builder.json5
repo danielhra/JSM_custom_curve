@@ -22,6 +22,29 @@
     "owner": "evan1mclean",
     "repo": "JSM_custom_curve"
   },
+  "mac": {
+    "category": "public.app-category.utilities",
+    "artifactName": "JoyShockMapper-Custom-Curve-${version}-${arch}.${ext}",
+    "target": [
+      {
+        "target": "dmg",
+        "arch": [
+          "arm64"
+        ]
+      },
+      {
+        "target": "zip",
+        "arch": [
+          "arm64"
+        ]
+      }
+    ],
+    // JSM synthesises input through CGEvent, which macOS gates behind
+    // Accessibility; the user grants it to the bundled app on first use.
+    "extendInfo": {
+      "NSAppleEventsUsageDescription": "JoyShockMapper needs to send keyboard and mouse input on your behalf."
+    }
+  },
   "win": {
     "icon": "public/gyro-icon.ico",
     "artifactName": "JoyShockMapper-Custom-Curve-${version}.${ext}",

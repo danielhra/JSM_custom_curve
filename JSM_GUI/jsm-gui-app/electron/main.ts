@@ -3,6 +3,7 @@ import { autoUpdater } from 'electron-updater'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import fs from 'node:fs/promises'
+import { constants as fsConstants } from 'node:fs'
 import * as dgram from 'node:dgram'
 import { spawn, ChildProcess } from 'node:child_process'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -401,9 +402,45 @@ function stopTelemetryListener() {
   }
 }
 
+// On Windows the GUI drives JSM by injecting keystrokes into its console.
+// Everywhere else JSM listens on a FIFO instead (it replaces its own stdin
+// early in main(), so writing to the child's stdin would go nowhere).
+const JSM_COMMAND_FIFO = '/tmp/jsm_command_fifo'
+
+let jsmOutputBuffer = ''
+const JSM_OUTPUT_LIMIT = 64 * 1024
+// JSM colourises its console output; the UI wants the plain text.
+const stripAnsi = (text: string) => text.replace(/\u001B\[[0-9;]*[A-Za-z]/g, '')
+
+function appendJsmOutput(chunk: string) {
+  jsmOutputBuffer += stripAnsi(chunk)
+  if (jsmOutputBuffer.length > JSM_OUTPUT_LIMIT) {
+    jsmOutputBuffer = jsmOutputBuffer.slice(-JSM_OUTPUT_LIMIT)
+  }
+}
+
+async function sendCommandViaFifo(command: string) {
+  if (!jsmProcess || !jsmProcess.pid) {
+    return false
+  }
+  let handle: fs.FileHandle | undefined
+  try {
+    // O_NONBLOCK makes the open fail with ENXIO when nothing is reading,
+    // instead of blocking the main process forever on a stale FIFO.
+    handle = await fs.open(JSM_COMMAND_FIFO, fsConstants.O_WRONLY | fsConstants.O_NONBLOCK)
+    await handle.write(`${command}\n`)
+    return true
+  } catch (err) {
+    await writeLog(`Could not write to JSM command FIFO: ${String(err)}`)
+    return false
+  } finally {
+    await handle?.close().catch(() => undefined)
+  }
+}
+
 async function tryInjectConsoleCommand(command: string) {
   if (process.platform !== 'win32') {
-    return false
+    return sendCommandViaFifo(command)
   }
   if (!jsmProcess || !jsmProcess.pid) {
     return false
@@ -438,7 +475,14 @@ async function tryInjectConsoleCommand(command: string) {
 
 async function runConsoleCommandWithOutput(command: string) {
   if (process.platform !== 'win32') {
-    return { success: false, output: '' }
+    // No injector to capture for us: send on the FIFO and collect whatever
+    // JSM prints to its piped stdout in response.
+    const mark = jsmOutputBuffer.length
+    if (!(await sendCommandViaFifo(command))) {
+      return { success: false, output: '' }
+    }
+    await new Promise(resolve => setTimeout(resolve, 500))
+    return { success: true, output: jsmOutputBuffer.slice(mark).trim() }
   }
   if (!jsmProcess || !jsmProcess.pid) {
     return { success: false, output: '' }
@@ -486,9 +530,18 @@ function launchJoyShockMapper(calibrationSeconds = 5) {
       const proc = spawn(JSM_EXECUTABLE, [], {
         cwd: BIN_DIR,
         windowsHide: true,
-        stdio: ['pipe', 'ignore', 'ignore'],
+        // Windows reads JSM's console through the injector; elsewhere we need
+        // its stdout to answer commands sent over the FIFO.
+        stdio: process.platform === 'win32' ? ['pipe', 'ignore', 'ignore'] : ['pipe', 'pipe', 'pipe'],
       })
       jsmProcess = proc
+      if (process.platform !== 'win32') {
+        jsmOutputBuffer = ''
+        proc.stdout?.setEncoding('utf8')
+        proc.stdout?.on('data', chunk => appendJsmOutput(String(chunk)))
+        proc.stderr?.setEncoding('utf8')
+        proc.stderr?.on('data', chunk => appendJsmOutput(String(chunk)))
+      }
       proc.once('error', err => {
         if (proc === jsmProcess) {
           jsmProcess = null
@@ -629,23 +682,28 @@ app.whenReady().then(async () => {
     launchJoyShockMapper(calibrationSecondsSetting).catch(err => console.error('Auto-launch failed', err))
   }, 500)
 
-  autoUpdater.autoDownload = false
-  autoUpdater.checkForUpdates().catch(err => console.error('Update check failed', err))
+  // Only ever update a real installed build. Unpackaged, the "app bundle"
+  // electron-updater would replace is node_modules/electron/dist/Electron.app,
+  // so accepting an update during development deletes the dev runtime itself.
+  if (app.isPackaged) {
+    autoUpdater.autoDownload = false
+    autoUpdater.checkForUpdates().catch(err => console.error('Update check failed', err))
 
-  autoUpdater.on('update-available', (info) => {
-    pendingUpdateVersion = info.version
-    win?.webContents.send('update-available', info.version)
-  })
+    autoUpdater.on('update-available', (info) => {
+      pendingUpdateVersion = info.version
+      win?.webContents.send('update-available', info.version)
+    })
 
-  autoUpdater.on('download-progress', (progress) => {
-    win?.webContents.send('update-download-progress', Math.floor(progress.percent))
-  })
+    autoUpdater.on('download-progress', (progress) => {
+      win?.webContents.send('update-download-progress', Math.floor(progress.percent))
+    })
 
-  autoUpdater.on('update-downloaded', () => {
-    pendingUpdateVersion = null
-    updateReadyToInstall = true
-    win?.webContents.send('update-downloaded')
-  })
+    autoUpdater.on('update-downloaded', () => {
+      pendingUpdateVersion = null
+      updateReadyToInstall = true
+      win?.webContents.send('update-downloaded')
+    })
+  }
 })
 
 app.on('will-quit', () => {

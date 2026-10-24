@@ -1,0 +1,91 @@
+# Cyberpunk 2077 - Joy-Con pair + gyro aiming
+#
+# Gyro comes from the RIGHT Joy-Con (JSM's default), so the heavily-used
+# Shoot sits on the LEFT trigger to keep the aiming hand steady. The right
+# stick is free for weapon selection since gyro does the camera.
+
+RESET_MAPPINGS
+TELEMETRY_ENABLED = ON
+TELEMETRY_PORT = 8974
+
+# ======== Calibration - same game, so unchanged from the DualSense profile ========
+# Cyberpunk is 36000 mouse counts per 360 degrees at sensitivity 1.
+# IN_GAME_SENS must match the game's First-Person Camera slider.
+TICK_TIME = 1
+REAL_WORLD_CALIBRATION = 100
+IN_GAME_SENS = 5
+IGNORE_GYRO_DEVICES = 0x045e:0x028e
+
+# ======== Joy-Con specific ========
+# Gyro from the right Joy-Con, motion stick from the left. Both are already
+# JSM's defaults, stated here so the intent is obvious.
+JOYCON_GYRO_MASK = IGNORE_LEFT
+JOYCON_MOTION_MASK = IGNORE_RIGHT
+
+# ======== Noise and steadying ========
+# Joy-Con gyros are noisier than a DualSense, so the deadzone is wider than
+# the 0.4 used there. Lower it if micro-adjustments feel impeded.
+GYRO_CUTOFF_SPEED = 0.8
+GYRO_CUTOFF_RECOVERY = 1.0
+GYRO_SMOOTHING_DECAY = ON
+GYRO_SMOOTH_THRESHOLD = 2
+GYRO_SMOOTH_TIME = 0.04
+
+# ======== Sensitivity ========
+ROLL_CONTRIBUTION = -100
+MIN_GYRO_SENS = 5 3
+MAX_GYRO_SENS = 21 6
+MIN_GYRO_THRESHOLD = 0
+MAX_GYRO_THRESHOLD = 80
+ACCEL_CURVE = QUADRATIC
+AUTO_CALIBRATE_GYRO = OFF
+IGNORE_OS_MOUSE_SPEED
+
+# ======== Gyro control ========
+# Hold X to ratchet: gyro pauses so you can reposition your hands.
+GYRO_OFF = N
+
+# ======== LEFT Joy-Con ========
+# Taken from the reWASD "Cyberpunk 2077 / Config 1" profile.
+LUP = W                    # Movement
+LDOWN = S
+LLEFT = A
+LRIGHT = D
+
+ZL = LMOUSE                # Shoot
+L = TAB                    # Scan
+- = ESC                    # Menu (Minus)
+L3 = C                     # Crouch
+LUP+L3 = LSHIFT            # Sprint: push the stick forward and click it
+
+UP = F                     # Use / Exit Vehicle
+DOWN = X                   # Use Consumable
+LEFT = R                   # Reload
+RIGHT = E V                # Tap: Cyberware.  Hold: Call Vehicle.
+
+CAPTURE = M                # Map
+LSL = SCROLLUP             # Scroll up / Zoom in
+LSR = SCROLLDOWN           # Scroll down / Zoom out
+
+# ======== RIGHT Joy-Con ========
+ZR = RMOUSE                # Aim
+R = MMOUSE                 # Use Combat Gadget
++ = I                      # In-game menu (Plus)
+
+N = NONE                   # X - gyro ratchet only, see GYRO_OFF above
+E = SPACE                  # A - Jump
+S = LALT                   # B - Weapon wheel / holster
+W = Q                      # Y - Quick attack
+
+R3 = T                     # Open phone
+HOME = Z                   # Open message / shard
+
+# Right stick selects weapons. NO_MOUSE because gyro handles the camera, and
+# a high inner deadzone so a resting thumb does not switch weapons.
+RIGHT_STICK_MODE = NO_MOUSE
+RIGHT_STICK_DEADZONE_INNER = 0.9
+LEFT_RING_MODE = INNER
+RUP = 1
+RRIGHT = 2
+RDOWN = 3
+RLEFT = 4

@@ -1,97 +1,81 @@
-# Cyberpunk 2077 - Joy-Con pair + gyro aiming
-#
-# Gyro comes from the RIGHT Joy-Con. Aim is on ZL and Shoot on ZR, the
-# conventional way round. The right stick is free for weapon selection
-# since gyro handles the camera.
-
+# Required Settings
 RESET_MAPPINGS
 TELEMETRY_ENABLED = ON
 TELEMETRY_PORT = 8974
 
-# ======== Calibration - same game, so unchanged from the DualSense profile ========
-# Cyberpunk is 36000 mouse counts per 360 degrees at sensitivity 1.
-# IN_GAME_SENS must match the game's First-Person Camera slider.
+# Gyro Behavior
 TICK_TIME = 1
 REAL_WORLD_CALIBRATION = 100
 IN_GAME_SENS = 5
 IGNORE_GYRO_DEVICES = 0x045e:0x028e
 
-# ======== Joy-Con specific ========
-# Gyro from the right Joy-Con, motion stick from the left. Both are already
-# JSM's defaults, stated here so the intent is obvious.
-JOYCON_GYRO_MASK = IGNORE_LEFT
-JOYCON_MOTION_MASK = IGNORE_RIGHT
-
-# ======== Noise and steadying ========
-# A very small deadzone, just enough to absorb residual drift. At 0.1 deg/s a
-# full 360 degree turn would take an hour, so it is far below any deliberate
-# aim. The 0.4 that was here before felt sticky; 0.8 was worse.
+# Noise & Steadying
 GYRO_CUTOFF_SPEED = 0.1
 GYRO_CUTOFF_RECOVERY = 0.15
 GYRO_SMOOTHING_DECAY = ON
 GYRO_SMOOTH_THRESHOLD = 2
 GYRO_SMOOTH_TIME = 0.04
 
-# ======== Sensitivity ========
+# Sensitivity
 ROLL_CONTRIBUTION = -100
-MIN_GYRO_SENS = 5 3
-MAX_GYRO_SENS = 21 6
-MIN_GYRO_THRESHOLD = 0
-MAX_GYRO_THRESHOLD = 80
-ACCEL_CURVE = QUADRATIC
-# ON because gyro bias shifts as the controller warms, so a one-time
-# calibration goes stale and the aim starts creeping. This re-estimates the
-# bias whenever it detects the controller is still.
-AUTO_CALIBRATE_GYRO = ON
-IGNORE_OS_MOUSE_SPEED
 
-# ======== Gyro control ========
-# Hold X to ratchet: gyro pauses so you can reposition your hands.
+# Face Buttons
 GYRO_OFF = N
-
-# ======== LEFT Joy-Con ========
-# Taken from the reWASD "Cyberpunk 2077 / Config 1" profile.
-LUP = W                    # Movement
-LDOWN = S
-LLEFT = A
-LRIGHT = D
-
-ZL = RMOUSE                # Aim
-L = TAB                    # Scan
-- = ESC                    # Menu (Minus)
-# Tap to crouch, hold to sprint. Deliberately NOT a LUP+L3 sim press: any
-# sim mapping on LUP makes it wait out SIM_PRESS_WINDOW before sending W,
-# which stalls forward movement on every single input.
-L3 = C LSHIFT              # Tap: Crouch.  Hold: Sprint.
-
-UP = F                     # Use / Exit Vehicle
-DOWN = X                   # Use Consumable
-LEFT = R                   # Reload
-RIGHT = E V                # Tap: Cyberware.  Hold: Call Vehicle.
-
-CAPTURE = M                # Map
-LSL = SCROLLUP             # Scroll up / Zoom in
-LSR = SCROLLDOWN           # Scroll down / Zoom out
-
-# ======== RIGHT Joy-Con ========
-ZR = LMOUSE                # Shoot
-R = MMOUSE                 # Use Combat Gadget
-+ = I                      # In-game menu (Plus)
-
 N = NONE                   # X - gyro ratchet only, see GYRO_OFF above
 E = SPACE                  # A - Jump
 S = LALT                   # B - Weapon wheel / holster
 W = Q                      # Y - Quick attack
 
-R3 = T                     # Open phone
+# D-pad
+UP = F                     # Use / Exit Vehicle
+DOWN = X                   # Use Consumable
+LEFT = R                   # Reload
+RIGHT = E V                # Tap: Cyberware.  Hold: Call Vehicle.
+
+# Bumpers
+L = TAB                    # Scan
+R = MMOUSE                 # Use Combat Gadget
+
+# Triggers
+ZL = LMOUSE #
+ZR = RMOUSE #
+
+# Center buttons
+- = ESC                    # Menu (Minus)
++ = I                      # In-game menu (Plus)
 HOME = Z                   # Open message / shard
 
-# Right stick selects weapons. NO_MOUSE because gyro handles the camera, and
-# a high inner deadzone so a resting thumb does not switch weapons.
-RIGHT_STICK_MODE = NO_MOUSE
-RIGHT_STICK_DEADZONE_INNER = 0.9
-LEFT_RING_MODE = INNER
+# Paddles
+LSL = SCROLLUP             # Scroll up / Zoom in
+LSR = SCROLLDOWN           # Scroll down / Zoom out
+
+# Touchpad
+CAPTURE = M                # Map
+
+# Stick bindings
+LUP = W                    # Movement
+LDOWN = S
+LLEFT = A
+LRIGHT = D
+L3 = C LSHIFT              # Tap: Crouch.  Hold: Sprint.
 RUP = 1
-RRIGHT = 2
 RDOWN = 3
 RLEFT = 4
+RRIGHT = 2
+R3 = T                     # Open phone
+
+# Sticks
+LEFT_RING_MODE = INNER
+RIGHT_STICK_DEADZONE_INNER = 0.9
+RIGHT_STICK_MODE = NO_MOUSE
+
+# Custom
+JOYCON_GYRO_MASK = IGNORE_LEFT
+JOYCON_MOTION_MASK = IGNORE_RIGHT
+AUTO_CALIBRATE_GYRO = ON
+IGNORE_OS_MOUSE_SPEED
+MIN_GYRO_SENS = 5 3
+MAX_GYRO_SENS = 5 3
+MIN_GYRO_THRESHOLD = 0
+MAX_GYRO_THRESHOLD = 50
+ACCEL_CURVE = LINEAR

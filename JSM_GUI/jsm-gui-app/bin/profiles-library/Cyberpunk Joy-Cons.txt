@@ -34,11 +34,12 @@ GYRO_SMOOTH_TIME = 0.04
 
 # ======== Sensitivity ========
 ROLL_CONTRIBUTION = -100
-MIN_GYRO_SENS = 5 3
-MAX_GYRO_SENS = 21 6
-MIN_GYRO_THRESHOLD = 0
-MAX_GYRO_THRESHOLD = 80
-ACCEL_CURVE = QUADRATIC
+# Flat sensitivity, no acceleration. GYRO_SENS writes to both MIN_GYRO_SENS
+# and MAX_GYRO_SENS, and when those are equal the acceleration curve
+# interpolates between two identical values, so speed no longer affects it.
+# MIN/MAX_GYRO_THRESHOLD and ACCEL_CURVE are therefore omitted: they would
+# still be evaluated but could not change the result.
+GYRO_SENS = 5 3
 # ON because gyro bias shifts as the controller warms, so a one-time
 # calibration goes stale and the aim starts creeping. This re-estimates the
 # bias whenever it detects the controller is still.

@@ -23,10 +23,11 @@ JOYCON_GYRO_MASK = IGNORE_LEFT
 JOYCON_MOTION_MASK = IGNORE_RIGHT
 
 # ======== Noise and steadying ========
-# Joy-Con gyros are noisier than a DualSense, so the deadzone is wider than
-# the 0.4 used there. Lower it if micro-adjustments feel impeded.
-GYRO_CUTOFF_SPEED = 0.8
-GYRO_CUTOFF_RECOVERY = 1.0
+# No gyro deadzone. GYRO_CUTOFF_SPEED and GYRO_CUTOFF_RECOVERY both default
+# to 0, so they are deliberately absent rather than set. A deadzone discards
+# slow rotation outright, which costs more on a Joy-Con than a DualSense:
+# SDL reports Joy-Con gyro at 200Hz against the DualSense's 1000Hz, so there
+# is five times less data to throw away.
 GYRO_SMOOTHING_DECAY = ON
 GYRO_SMOOTH_THRESHOLD = 2
 GYRO_SMOOTH_TIME = 0.04

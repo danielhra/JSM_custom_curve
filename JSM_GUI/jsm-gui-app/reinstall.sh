@@ -41,8 +41,16 @@ else
   exit 1
 fi
 
-echo "Active profile:"
-grep -hE "^(R = |CAPTURE = |GYRO_OFF|ADAPTIVE_TRIGGER|REAL_WORLD_CALIBRATION|IN_GAME_SENS|MIN_GYRO_SENS|MAX_GYRO_SENS)" \
-  "$DST/Contents/Resources/bin/profiles-library/Profile 1.txt" | sed 's/^/  /'
+# Profiles live under userData now, not in the bundle, and the active one is
+# named by the last line of the startup file.
+USER_BIN="$HOME/Library/Application Support/jsm-gui-app/bin"
+ACTIVE="$(tail -1 "$USER_BIN/SDL/OnStartUp.txt" 2>/dev/null | sed 's|^\.\./profiles-library/||')"
+if [[ -n "$ACTIVE" && -f "$USER_BIN/profiles-library/$ACTIVE" ]]; then
+  echo "Active profile: $ACTIVE"
+  grep -hE "^(R = |CAPTURE = |GYRO_OFF|ADAPTIVE_TRIGGER|REAL_WORLD_CALIBRATION|IN_GAME_SENS|MIN_GYRO_SENS|MAX_GYRO_SENS|GYRO_SMOOTH_THRESHOLD)" \
+    "$USER_BIN/profiles-library/$ACTIVE" | sed 's/^/  /'
+else
+  echo "Active profile: (none yet - it is seeded on first launch)"
+fi
 
 open "$DST" && echo "Relaunched."

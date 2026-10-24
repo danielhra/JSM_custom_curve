@@ -1,8 +1,8 @@
 # Cyberpunk 2077 - Joy-Con pair + gyro aiming
 #
-# Gyro comes from the RIGHT Joy-Con (JSM's default), so the heavily-used
-# Shoot sits on the LEFT trigger to keep the aiming hand steady. The right
-# stick is free for weapon selection since gyro does the camera.
+# Gyro comes from the RIGHT Joy-Con. Aim is on ZL and Shoot on ZR, the
+# conventional way round. The right stick is free for weapon selection
+# since gyro handles the camera.
 
 RESET_MAPPINGS
 TELEMETRY_ENABLED = ON
@@ -52,11 +52,13 @@ LDOWN = S
 LLEFT = A
 LRIGHT = D
 
-ZL = LMOUSE                # Shoot
+ZL = RMOUSE                # Aim
 L = TAB                    # Scan
 - = ESC                    # Menu (Minus)
-L3 = C                     # Crouch
-LUP+L3 = LSHIFT            # Sprint: push the stick forward and click it
+# Tap to crouch, hold to sprint. Deliberately NOT a LUP+L3 sim press: any
+# sim mapping on LUP makes it wait out SIM_PRESS_WINDOW before sending W,
+# which stalls forward movement on every single input.
+L3 = C LSHIFT              # Tap: Crouch.  Hold: Sprint.
 
 UP = F                     # Use / Exit Vehicle
 DOWN = X                   # Use Consumable
@@ -68,7 +70,7 @@ LSL = SCROLLUP             # Scroll up / Zoom in
 LSR = SCROLLDOWN           # Scroll down / Zoom out
 
 # ======== RIGHT Joy-Con ========
-ZR = RMOUSE                # Aim
+ZR = LMOUSE                # Shoot
 R = MMOUSE                 # Use Combat Gadget
 + = I                      # In-game menu (Plus)
 

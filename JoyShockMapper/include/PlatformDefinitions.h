@@ -143,7 +143,7 @@ extern const char *GYRO_CONFIGS_FOLDER();
 extern const char *BASE_JSM_CONFIG_FOLDER();
 extern std::string NONAME;
 
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__APPLE__)
 
 #include <cassert>
 #include <sstream>

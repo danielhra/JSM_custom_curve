@@ -4,6 +4,11 @@
  #include "TriggerEffectGenerator.h"
 #include "SettingsManager.h"
 #include "SDL3/SDL.h"
+
+#ifdef __APPLE__
+#include <mach/mach_time.h>
+#include <pthread.h>
+#endif
 #include <map>
 #include <mutex>
 #include <atomic>
@@ -442,6 +447,54 @@ private:
 			next_poll_time = now;
 		}
 	}
+#elif defined(__APPLE__)
+	// macOS rounds ordinary sleeps up to the system timer's slop (~15ms),
+	// which would cap gyro polling around 63Hz. mach_wait_until honours a
+	// sub-millisecond deadline, and a user-interactive QoS class keeps the
+	// poll thread off the efficiency cores.
+	mach_timebase_info_data_t timebase_{};
+	uint64_t next_poll_time = 0;
+
+	void DisableProcessPowerThrottling()
+	{
+	}
+
+	void RaiseProcessPriority()
+	{
+	}
+
+	void RaiseThreadPriority()
+	{
+		pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
+	}
+
+	void SetMaxTimerResolution()
+	{
+		mach_timebase_info(&timebase_);
+	}
+
+	void InitPollingTimer()
+	{
+		if (timebase_.denom == 0)
+			mach_timebase_info(&timebase_);
+		next_poll_time = mach_absolute_time();
+	}
+
+	void PollingTimer(uint64_t interval_ms)
+	{
+		if (timebase_.numer == 0)
+			mach_timebase_info(&timebase_);
+
+		const uint64_t interval_ns = interval_ms * 1000000ULL;
+		next_poll_time += interval_ns * timebase_.denom / timebase_.numer;
+
+		const uint64_t now = mach_absolute_time();
+		if (now < next_poll_time)
+			mach_wait_until(next_poll_time);
+		else
+			next_poll_time = now; // fell behind
+	}
+
 #else
 	void DisableProcessPowerThrottling()
 	{

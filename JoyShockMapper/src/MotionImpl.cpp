@@ -1,4 +1,7 @@
 #include "MotionIf.h"
+
+#include <cmath> // GamepadMotion.hpp uses std::abs without including this
+
 #include "GamepadMotion.hpp"
 
 class MotionImpl : public MotionIf

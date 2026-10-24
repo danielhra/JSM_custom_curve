@@ -143,6 +143,28 @@ if (WINDOWS)
      add_definitions(/bigobj) # /experimental:module
 endif ()
 
+if (MACOS)
+    # macOS has no JoyShockLibrary build, so SDL is the only backend.
+    target_sources (
+            ${BINARY_NAME} PRIVATE
+            src/SDLWrapper.cpp
+    )
+    # Scoped to the target on purpose: add_definitions() would also apply to
+    # the SDL3 sources CPM adds below, and SDL has an Objective-C category
+    # literally named SDL that a -DSDL define rewrites into a syntax error.
+    target_compile_definitions(${BINARY_NAME} PRIVATE SDL)
+
+    target_sources (
+        ${BINARY_NAME} PRIVATE
+        src/macos/Init.cpp
+        src/macos/InputHelpers.cpp
+        src/macos/PlatformDefinitions.cpp
+        src/macos/TrayIcon.cpp
+        src/macos/Whitelister.cpp
+        src/macos/Gamepad.cpp
+    )
+endif ()
+
 if (LINUX)
     if(SDL OR NOT DEFINED SDL)
         target_sources (
@@ -191,6 +213,25 @@ if(SDL OR NOT DEFINED SDL)
         GITHUB_REPOSITORY libsdl-org/SDL
         GIT_TAG release-3.4.4
 	)
+	if (MACOS)
+		# SDL opens HID devices non-exclusively on macOS so that several apps can
+		# share one controller. JSM needs the opposite: seizing the pad is what
+		# stops a game reading it directly and switching itself to gamepad input.
+		# This is the macOS stand-in for HidHide on Windows.
+		set(_jsm_hidapi "${SDL3_SOURCE_DIR}/src/hidapi/SDL_hidapi.c")
+		file(READ "${_jsm_hidapi}" _jsm_hidapi_src)
+		string(REPLACE "hid_darwin_set_open_exclusive(0);"
+		               "hid_darwin_set_open_exclusive(1);"
+		               _jsm_hidapi_new "${_jsm_hidapi_src}")
+		if (NOT _jsm_hidapi_src STREQUAL _jsm_hidapi_new)
+			file(WRITE "${_jsm_hidapi}" "${_jsm_hidapi_new}")
+			message(STATUS "Patched SDL for exclusive HID access (hides the controller from other apps)")
+		endif()
+		if (NOT _jsm_hidapi_new MATCHES "hid_darwin_set_open_exclusive\\(1\\);")
+			message(FATAL_ERROR "SDL exclusive-HID patch did not apply - check src/hidapi/SDL_hidapi.c upstream")
+		endif()
+	endif()
+
 	set_target_properties(SDL_uclibc PROPERTIES FOLDER "SDL")
     set_target_properties(SDL3-shared PROPERTIES FOLDER "SDL")
 	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")

@@ -41,20 +41,28 @@ let updateReadyToInstall = false
 type BackendChoice = 'SDL' | 'legacy'
 const TELEMETRY_PORT = 8974
 let backendChoice: BackendChoice = 'SDL'
-let BIN_DIR = app.isPackaged ? path.join(process.resourcesPath, 'bin', backendChoice) : path.join(APP_ROOT, 'bin', backendChoice)
-let STARTUP_FILE = path.join(BIN_DIR, 'OnStartUp.txt')
+// The bundle is read-only: writing inside a signed .app breaks its code
+// signature, and macOS ties the Accessibility grant to a valid signature.
+// So the executable is read from the bundle, while everything the app writes
+// (startup file, profile library, calibration presets) lives under userData.
+// WORK_DIR is the backend's cwd, and the backend resolves profile paths as
+// "../profiles-library/<name>", so the two must remain siblings.
+const bundleBin = (...parts: string[]) =>
+  path.join(app.isPackaged ? process.resourcesPath : APP_ROOT, 'bin', ...parts)
+const userBin = (...parts: string[]) => path.join(DATA_DIR, 'bin', ...parts)
+const writableBin = (...parts: string[]) => (app.isPackaged ? userBin(...parts) : bundleBin(...parts))
+
+let BIN_DIR = bundleBin(backendChoice)
+let WORK_DIR = writableBin(backendChoice)
+let STARTUP_FILE = path.join(WORK_DIR, 'OnStartUp.txt')
 const STARTUP_COMMAND = 'OnStartUp.txt'
 let JSM_EXECUTABLE = path.join(BIN_DIR, process.platform === 'win32' ? 'JoyShockMapper.exe' : 'JoyShockMapper')
 let CONSOLE_INJECTOR = path.join(BIN_DIR, process.platform === 'win32' ? 'jsm-console-injector.exe' : 'jsm-console-injector')
 const LOG_FILE = path.join(DATA_DIR, 'jsm-gui.log')
 const WINDOW_STATE_FILE = path.join(DATA_DIR, 'window-state.json')
 
-const PROFILE_LIBRARY_DIR = app.isPackaged
-  ? path.join(process.resourcesPath, 'bin', 'profiles-library')
-  : path.join(APP_ROOT, 'bin', 'profiles-library')
-const CALIBRATION_DIR = app.isPackaged
-  ? path.join(process.resourcesPath, 'bin', 'GyroConfigs')
-  : path.join(APP_ROOT, 'bin', 'GyroConfigs')
+const PROFILE_LIBRARY_DIR = writableBin('profiles-library')
+const CALIBRATION_DIR = writableBin('GyroConfigs')
 const DEFAULT_PROFILE_NAME = 'Profile 1'
 const PROFILE_LIBRARY_RELATIVE = path.posix.join('..', 'profiles-library')
 const DEFAULT_PROFILE_RELATIVE = `${PROFILE_LIBRARY_RELATIVE}/${DEFAULT_PROFILE_NAME}.txt`
@@ -85,8 +93,32 @@ async function ensureFileExists(filePath: string, defaultContent = '') {
   }
 }
 
+// Copy the profiles and gyro configs shipped in the bundle into userData the
+// first time, without ever overwriting something the user has edited.
+async function seedFromBundle(from: string, to: string) {
+  let entries: string[]
+  try {
+    entries = await fs.readdir(from)
+  } catch {
+    return
+  }
+  await fs.mkdir(to, { recursive: true })
+  for (const entry of entries) {
+    const target = path.join(to, entry)
+    try {
+      await fs.access(target)
+    } catch {
+      await fs.copyFile(path.join(from, entry), target).catch(() => undefined)
+    }
+  }
+}
+
 async function ensureRequiredFiles() {
-  await fs.mkdir(BIN_DIR, { recursive: true })
+  await fs.mkdir(WORK_DIR, { recursive: true })
+  if (app.isPackaged) {
+    await seedFromBundle(bundleBin('profiles-library'), PROFILE_LIBRARY_DIR)
+    await seedFromBundle(bundleBin('GyroConfigs'), CALIBRATION_DIR)
+  }
   await ensureLibraryDir()
   await ensureActiveProfileExists()
 }
@@ -101,8 +133,9 @@ async function loadBackendChoice() {
   } catch {
     backendChoice = 'SDL'
   }
-  BIN_DIR = app.isPackaged ? path.join(process.resourcesPath, 'bin', backendChoice) : path.join(APP_ROOT, 'bin', backendChoice)
-  STARTUP_FILE = path.join(BIN_DIR, 'OnStartUp.txt')
+  BIN_DIR = bundleBin(backendChoice)
+  WORK_DIR = writableBin(backendChoice)
+  STARTUP_FILE = path.join(WORK_DIR, 'OnStartUp.txt')
   JSM_EXECUTABLE = path.join(BIN_DIR, process.platform === 'win32' ? 'JoyShockMapper.exe' : 'JoyShockMapper')
   CONSOLE_INJECTOR = path.join(BIN_DIR, process.platform === 'win32' ? 'jsm-console-injector.exe' : 'jsm-console-injector')
 }
@@ -111,8 +144,9 @@ async function saveBackendChoice(choice: BackendChoice) {
   backendChoice = choice
   await fs.mkdir(path.dirname(BACKEND_FILE), { recursive: true })
   await fs.writeFile(BACKEND_FILE, JSON.stringify(choice), 'utf8')
-  BIN_DIR = app.isPackaged ? path.join(process.resourcesPath, 'bin', backendChoice) : path.join(APP_ROOT, 'bin', backendChoice)
-  STARTUP_FILE = path.join(BIN_DIR, 'OnStartUp.txt')
+  BIN_DIR = bundleBin(backendChoice)
+  WORK_DIR = writableBin(backendChoice)
+  STARTUP_FILE = path.join(WORK_DIR, 'OnStartUp.txt')
   JSM_EXECUTABLE = path.join(BIN_DIR, process.platform === 'win32' ? 'JoyShockMapper.exe' : 'JoyShockMapper')
   CONSOLE_INJECTOR = path.join(BIN_DIR, process.platform === 'win32' ? 'jsm-console-injector.exe' : 'jsm-console-injector')
 }
@@ -454,7 +488,7 @@ async function tryInjectConsoleCommand(command: string) {
 
   return new Promise<boolean>(resolve => {
     const injector = spawn(CONSOLE_INJECTOR, [String(jsmProcess!.pid), command], {
-      cwd: BIN_DIR,
+      cwd: WORK_DIR,
       windowsHide: true,
       stdio: 'ignore',
     })
@@ -495,7 +529,7 @@ async function runConsoleCommandWithOutput(command: string) {
   }
   return new Promise<{ success: boolean; output: string }>(resolve => {
     const injector = spawn(CONSOLE_INJECTOR, [String(jsmProcess!.pid), command, '--capture'], {
-      cwd: BIN_DIR,
+      cwd: WORK_DIR,
       windowsHide: true,
       stdio: ['ignore', 'pipe', 'pipe'],
     })
@@ -528,7 +562,7 @@ function launchJoyShockMapper(calibrationSeconds = 5) {
   return new Promise<void>((resolve, reject) => {
     try {
       const proc = spawn(JSM_EXECUTABLE, [], {
-        cwd: BIN_DIR,
+        cwd: WORK_DIR,
         windowsHide: true,
         // Windows reads JSM's console through the injector; elsewhere we need
         // its stdout to answer commands sent over the FIFO.

@@ -23,11 +23,11 @@ JOYCON_GYRO_MASK = IGNORE_LEFT
 JOYCON_MOTION_MASK = IGNORE_RIGHT
 
 # ======== Noise and steadying ========
-# No gyro deadzone. GYRO_CUTOFF_SPEED and GYRO_CUTOFF_RECOVERY both default
-# to 0, so they are deliberately absent rather than set. A deadzone discards
-# slow rotation outright, which costs more on a Joy-Con than a DualSense:
-# SDL reports Joy-Con gyro at 200Hz against the DualSense's 1000Hz, so there
-# is five times less data to throw away.
+# A very small deadzone, just enough to absorb residual drift. At 0.1 deg/s a
+# full 360 degree turn would take an hour, so it is far below any deliberate
+# aim. The 0.4 that was here before felt sticky; 0.8 was worse.
+GYRO_CUTOFF_SPEED = 0.1
+GYRO_CUTOFF_RECOVERY = 0.15
 GYRO_SMOOTHING_DECAY = ON
 GYRO_SMOOTH_THRESHOLD = 2
 GYRO_SMOOTH_TIME = 0.04
@@ -39,7 +39,10 @@ MAX_GYRO_SENS = 21 6
 MIN_GYRO_THRESHOLD = 0
 MAX_GYRO_THRESHOLD = 80
 ACCEL_CURVE = QUADRATIC
-AUTO_CALIBRATE_GYRO = OFF
+# ON because gyro bias shifts as the controller warms, so a one-time
+# calibration goes stale and the aim starts creeping. This re-estimates the
+# bias whenever it detects the controller is still.
+AUTO_CALIBRATE_GYRO = ON
 IGNORE_OS_MOUSE_SPEED
 
 # ======== Gyro control ========

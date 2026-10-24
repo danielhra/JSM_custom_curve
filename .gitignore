@@ -325,3 +325,10 @@ _deps
 install/
 project.md
 testing/
+
+# The GUI's bin/ is build output (binaries, dylibs) and matched by [Bb]in/
+# above, but the profile library inside it is configuration worth versioning.
+!JSM_GUI/jsm-gui-app/bin/
+JSM_GUI/jsm-gui-app/bin/*
+!JSM_GUI/jsm-gui-app/bin/profiles-library/
+!JSM_GUI/jsm-gui-app/bin/profiles-library/*.txt

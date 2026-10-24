@@ -1,0 +1,94 @@
+# Cyberpunk 2077 - DualSense + gyro aiming
+#
+# Premise: gyro does the aiming, so the right stick is not needed for the
+# camera and becomes four extra buttons (a weapon wheel). Keys below are
+# Cyberpunk's PC defaults; actions marked (?) were not in the reference and
+# should be checked in the in-game Controls menu.
+
+RESET_MAPPINGS
+TELEMETRY_ENABLED = ON
+TELEMETRY_PORT = 8974
+
+# ======== Gyro - unchanged from your tuned setup ========
+TICK_TIME = 1
+# Cyberpunk 2077 measures 36000 mouse counts per 360 degrees at in-game
+# sensitivity 1, so counts-per-degree at sens 1 is 36000/360 = 100.
+# IN_GAME_SENS must equal the game's slider (First-Person Camera > Horizontal
+# AND Vertical, which must match each other). Change the slider, change this.
+REAL_WORLD_CALIBRATION = 100
+IN_GAME_SENS = 5
+IGNORE_GYRO_DEVICES = 0x045e:0x028e
+
+GYRO_CUTOFF_SPEED = 0.4
+GYRO_SMOOTHING_DECAY = ON
+GYRO_CUTOFF_RECOVERY = 0.5
+
+ROLL_CONTRIBUTION = -100
+MIN_GYRO_SENS = 5 3
+MAX_GYRO_SENS = 20 6
+MIN_GYRO_THRESHOLD = 3
+ACCEL_CURVE = QUADRATIC
+MAX_GYRO_THRESHOLD = 80
+
+AUTO_CALIBRATE_GYRO = OFF
+IGNORE_OS_MOUSE_SPEED
+HIDE_MINIMIZED = ON
+
+# Hold R1 to suspend gyro and reposition your hands.
+GYRO_OFF = R
+
+# ======== Movement - left stick ========
+LUP = W
+LDOWN = S
+LLEFT = A
+LRIGHT = D
+
+# ======== Face buttons ========
+S = SPACE                  # Cross    - Jump
+E = LCONTROL               # Circle   - Crouch (hold), console muscle memory
+N = Q                      # Triangle - Quick attack (melee)
+W = R                      # Square   - Reload
+
+# ======== Shoulders and triggers ========
+ZR = LMOUSE                # R2 - Shoot
+ZL = RMOUSE                # L2 - Aim
+# R1 is the gyro ratchet and nothing else. Anything bound here would fire
+# every time you reposition your hands, which is constantly.
+R = NONE                   # R1 - gyro ratchet only
+L = LSHIFT                 # L1 - Sprint (toggle)
+
+ADAPTIVE_TRIGGER = OFF
+TRIGGER_THRESHOLD = 0
+LEFT_TRIGGER_OFFSET = 60
+LEFT_TRIGGER_RANGE = 255
+RIGHT_TRIGGER_OFFSET = 60
+RIGHT_TRIGGER_RANGE = 255
+
+# ======== Stick clicks ========
+L3 = F                     # Interact - reachable while moving
+R3 = C                     # Crouch (toggle), pairs with Circle's hold
+
+# ======== D-pad - utility ========
+UP = TAB                   # Scan (hold)
+DOWN = X                   # Use consumable / heal
+LEFT = 4                   # Fists / melee weapon
+RIGHT = SCROLLUP           # Next weapon
+
+# ======== Right stick as a weapon wheel ========
+# Free because gyro aims. Tilt, do not click.
+RUP = 1                    # Weapon slot 1
+RRIGHT = 2                 # Weapon slot 2
+RDOWN = 3                  # Weapon slot 3
+RLEFT = MMOUSE             # Combat gadget
+
+# Right stick must register tilts as buttons, and only near full deflection
+# so a resting thumb does not fire them.
+RIGHT_STICK_MODE = NO_MOUSE
+RIGHT_STICK_DEADZONE_INNER = 0.9
+LEFT_RING_MODE = INNER
+
+# ======== Centre buttons ========
+- = ESC                    # Create/Share - Pause menu
++ = I                      # Options      - Inventory (?)
+CAPTURE = E                # Touchpad CLICK - Cyberware systems (moved off R1)
+MIC = T                    # Mic button  - Phone

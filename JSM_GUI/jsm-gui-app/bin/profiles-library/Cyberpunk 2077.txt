@@ -36,8 +36,8 @@ GYRO_OFF = N
 
 # Face buttons - Joy-Con layout, same ButtonIDs on a DualSense
 N = NONE                   # Triangle - gyro ratchet only, see GYRO_OFF
-E = SPACE                  # Circle   - Jump
-S = LALT                   # Cross    - Weapon wheel / holster
+E = LALT                   # Circle   - Weapon wheel / holster
+S = SPACE                  # Cross (X) - Jump
 W = Q                      # Square   - Quick attack
 
 # D-pad
@@ -63,8 +63,16 @@ RIGHT_TRIGGER_RANGE = 255
 - = ESC                    # Create  - Menu
 + = I                      # Options - In-game menu
 HOME = Z                   # PS      - Open message / shard
-CAPTURE = M                # Touchpad click - Map
-MIC = MMOUSE               # Combat gadget, displaced from R1 by Control
+MIC = T                    # Mic button - Open phone
+
+# Map is a combo now: Create + Options together. Note this costs 50ms
+# (SIM_PRESS_WINDOW) on each of those buttons pressed alone, since a sim
+# mapping makes a button wait to see whether its partner follows. Fine on
+# menu buttons; it is why the sticks must never carry a sim mapping.
+-++ = M                    # Create + Options - Map
+
+# The touchpad click is deliberately unbound, which leaves the touch grid
+# (T1..Tn, see GRID_SIZE) free of the click-also-touches conflict.
 
 # Stick bindings
 LUP = W                    # Movement
@@ -76,7 +84,7 @@ RUP = 1
 RRIGHT = 2
 RDOWN = 3
 RLEFT = 4
-R3 = T                     # Open phone
+R3 = MMOUSE                # Combat gadget, swapped off the mic button
 
 # Sticks
 LEFT_RING_MODE = INNER

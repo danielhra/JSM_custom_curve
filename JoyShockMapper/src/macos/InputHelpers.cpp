@@ -262,28 +262,16 @@ public:
 		CFRelease(event);
 	}
 
-	// Relative motion. The delta fields are what a relative-mouse-mode game
-	// reads, and they must be stamped on an event posted at the CURRENT
-	// cursor position: building the new position into the event instead makes
-	// SDL add its own warp correction on top, inflating motion erratically.
-	//
-	// The cursor is then moved separately with CGWarpMouseCursorPosition,
-	// which emits no event of its own and so does not disturb the delta.
-	// Without it the pointer never moves and anything driven by cursor
-	// position - in-game menus, the desktop - ignores the gyro entirely.
-	//
-	// Measured over repeated runs on macOS 15 / SDL3: deltas arrive at
-	// exactly 1.000 both with and without the warp, at slow and fast
-	// cadences alike. (Single samples mislead here; the first run of any
-	// batch reads high while SDL's warp compensation settles.)
+	// Relative motion. Measured on macOS 15/SDL3: stamping the delta fields
+	// and leaving the cursor alone is the only form a relative-mouse-mode
+	// game receives 1:1. Also moving the cursor makes SDL add its warp
+	// correction on top of the delta, inflating motion unpredictably.
 	void move_relative(int dx, int dy)
 	{
 		if (dx == 0 && dy == 0)
 			return;
 
-		const CGPoint here = cursor();
-
-		CGEventRef event = CGEventCreateMouseEvent(source_, dragged_or_moved(), here, held_button());
+		CGEventRef event = CGEventCreateMouseEvent(source_, dragged_or_moved(), cursor(), held_button());
 		if (!event)
 			return;
 		CGEventSetIntegerValueField(event, kCGMouseEventDeltaX, dx);
@@ -291,8 +279,6 @@ public:
 		CGEventSetFlags(event, flags_);
 		CGEventPost(kCGHIDEventTap, event);
 		CFRelease(event);
-
-		CGWarpMouseCursorPosition(CGPointMake(here.x + dx, here.y + dy));
 	}
 
 	// Absolute positioning does move the cursor, and measured exactly 1:1.

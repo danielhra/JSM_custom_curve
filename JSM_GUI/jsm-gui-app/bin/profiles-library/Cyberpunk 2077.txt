@@ -1,106 +1,84 @@
-# Cyberpunk 2077 - DualSense + gyro aiming
-#
-# Premise: gyro does the aiming, so the right stick is not needed for the
-# camera and becomes four extra buttons (a weapon wheel). Keys below are
-# Cyberpunk's PC defaults; actions marked (?) were not in the reference and
-# should be checked in the in-game Controls menu.
-
+# Required Settings
 RESET_MAPPINGS
 TELEMETRY_ENABLED = ON
 TELEMETRY_PORT = 8974
 
-# ======== Gyro - unchanged from your tuned setup ========
+# Gyro Behavior
 TICK_TIME = 1
-# Cyberpunk 2077 measures 36000 mouse counts per 360 degrees at in-game
-# sensitivity 1, so counts-per-degree at sens 1 is 36000/360 = 100.
-# IN_GAME_SENS must equal the game's slider (First-Person Camera > Horizontal
-# AND Vertical, which must match each other). Change the slider, change this.
 REAL_WORLD_CALIBRATION = 100
 IN_GAME_SENS = 5
 IGNORE_GYRO_DEVICES = 0x045e:0x028e
 
-GYRO_CUTOFF_SPEED = 0.4
-GYRO_CUTOFF_RECOVERY = 0.5
-
-# Smoothing. Both of these are required: GYRO_SMOOTH_THRESHOLD defaults to 0,
-# and applyGyroDecaySmoothing returns the raw input unchanged when either the
-# threshold or the time is 0 - so without them GYRO_SMOOTHING_DECAY does
-# nothing at all. GYRO_SMOOTH_TIME also defaults to 0.125s, several times
-# longer than wanted here.
-#
-# With DECAY on, the smoothed portion is g = (1 - speed/threshold)^2: fully
-# smoothed when nearly still, untouched at or above 2 deg/s, quadratic in
-# between. That kills jitter during micro-adjustments without dulling flicks.
+# Noise & Steadying - kept as tuned on the DualSense, not taken from the
+# Joy-Con profile: those values were picked for a 200Hz sensor.
+GYRO_CUTOFF_SPEED = 0
+GYRO_CUTOFF_RECOVERY = 0
 GYRO_SMOOTHING_DECAY = ON
-GYRO_SMOOTH_THRESHOLD = 2
 GYRO_SMOOTH_TIME = 0.04
+GYRO_SMOOTH_THRESHOLD = 0
+ONE_EURO_MIN_CUTOFF = 2
+ONE_EURO_SPEED_COEFF = 0.5
 
+# Sensitivity
 ROLL_CONTRIBUTION = -100
 MIN_GYRO_SENS = 5 3
-MAX_GYRO_SENS = 21 6
-MIN_GYRO_THRESHOLD = 0
-ACCEL_CURVE = QUADRATIC
+MAX_GYRO_SENS = 20 6
+MIN_GYRO_THRESHOLD = 5
 MAX_GYRO_THRESHOLD = 80
-
+ACCEL_CURVE = QUADRATIC
 AUTO_CALIBRATE_GYRO = OFF
 IGNORE_OS_MOUSE_SPEED
 HIDE_MINIMIZED = ON
+LIGHT_BAR = x9b5959
 
-# Hold R1 to suspend gyro and reposition your hands.
-GYRO_OFF = R
+# Gyro ratchet, moved from R1 to Triangle so R1 is free for Control.
+GYRO_OFF = N
 
-# ======== Movement - left stick ========
-LUP = W
-LDOWN = S
-LLEFT = A
-LRIGHT = D
+# Face buttons - Joy-Con layout, same ButtonIDs on a DualSense
+N = NONE                   # Triangle - gyro ratchet only, see GYRO_OFF
+E = SPACE                  # Circle   - Jump
+S = LALT                   # Cross    - Weapon wheel / holster
+W = Q                      # Square   - Quick attack
 
-# ======== Face buttons ========
-S = SPACE                  # Cross    - Jump
-E = LCONTROL               # Circle   - Crouch (hold), console muscle memory
-N = Q                      # Triangle - Quick attack (melee)
-W = R                      # Square   - Reload
+# D-pad
+UP = F                     # Use / Exit Vehicle
+DOWN = X                   # Use Consumable
+LEFT = R                   # Reload
+RIGHT = E V                # Tap: Cyberware.  Hold: Call Vehicle.
 
-# ======== Shoulders and triggers ========
+# Shoulders
+L = TAB                    # L1 - Scan
+R = LCONTROL               # R1 - Control (dash / crouch-hold), trying this out
+
+# Triggers - shoot on the RIGHT trigger
 ZR = LMOUSE                # R2 - Shoot
 ZL = RMOUSE                # L2 - Aim
-# R1 is the gyro ratchet and nothing else. Anything bound here would fire
-# every time you reposition your hands, which is constantly.
-R = NONE                   # R1 - gyro ratchet only
-L = LSHIFT                 # L1 - Sprint (toggle)
-
-ADAPTIVE_TRIGGER = OFF
 TRIGGER_THRESHOLD = 0
 LEFT_TRIGGER_OFFSET = 60
 LEFT_TRIGGER_RANGE = 255
 RIGHT_TRIGGER_OFFSET = 60
 RIGHT_TRIGGER_RANGE = 255
 
-# ======== Stick clicks ========
-L3 = F                     # Interact - reachable while moving
-R3 = C                     # Crouch (toggle), pairs with Circle's hold
+# Centre buttons
+- = ESC                    # Create  - Menu
++ = I                      # Options - In-game menu
+HOME = Z                   # PS      - Open message / shard
+CAPTURE = M                # Touchpad click - Map
+MIC = MMOUSE               # Combat gadget, displaced from R1 by Control
 
-# ======== D-pad - utility ========
-UP = TAB                   # Scan (hold)
-DOWN = X                   # Use consumable / heal
-LEFT = 4                   # Fists / melee weapon
-RIGHT = SCROLLUP           # Next weapon
+# Stick bindings
+LUP = W                    # Movement
+LDOWN = S
+LLEFT = A
+LRIGHT = D
+L3 = C LSHIFT              # Tap: Crouch.  Hold: Sprint.
+RUP = 1
+RRIGHT = 2
+RDOWN = 3
+RLEFT = 4
+R3 = T                     # Open phone
 
-# ======== Right stick as a weapon wheel ========
-# Free because gyro aims. Tilt, do not click.
-RUP = 1                    # Weapon slot 1
-RRIGHT = 2                 # Weapon slot 2
-RDOWN = 3                  # Weapon slot 3
-RLEFT = MMOUSE             # Combat gadget
-
-# Right stick must register tilts as buttons, and only near full deflection
-# so a resting thumb does not fire them.
-RIGHT_STICK_MODE = NO_MOUSE
-RIGHT_STICK_DEADZONE_INNER = 0.9
+# Sticks
 LEFT_RING_MODE = INNER
-
-# ======== Centre buttons ========
-- = ESC                    # Create/Share - Pause menu
-+ = I                      # Options      - Inventory (?)
-CAPTURE = E                # Touchpad CLICK - Cyberware systems (moved off R1)
-MIC = T                    # Mic button  - Phone
+RIGHT_STICK_DEADZONE_INNER = 0.9
+RIGHT_STICK_MODE = NO_MOUSE

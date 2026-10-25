@@ -47,8 +47,11 @@ LEFT = R                   # Reload
 RIGHT = E V                # Tap: Cyberware.  Hold: Call Vehicle.
 
 # Shoulders
-L = TAB                    # L1 - Scan
-R = LCONTROL               # R1 - Control (dash / crouch-hold), trying this out
+L = LSHIFT                 # L1 - Sprint
+# Tap for Control (dash / crouch-hold), hold for Scan. Note the tap fires on
+# release, so Control arrives up to HOLD_PRESS_TIME (150ms) late - the cost
+# of putting two actions on one button.
+R = LCONTROL TAB           # R1 - Tap: Control.  Hold: Scan.
 
 # Triggers - shoot on the RIGHT trigger
 ZR = LMOUSE                # R2 - Shoot

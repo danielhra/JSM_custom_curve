@@ -72,7 +72,16 @@ MIC = T                    # Mic button - Open phone
 -++ = M                    # Create + Options - Map
 
 # The touchpad click is deliberately unbound, which leaves the touch grid
-# (T1..Tn, see GRID_SIZE) free of the click-also-touches conflict.
+# free of the click-also-touches conflict: cells fire on contact, and you
+# cannot click without touching.
+#
+# GRID_SIZE is <columns> <rows>, cells numbered left-to-right then
+# top-to-bottom from T1. One column by two rows splits it horizontally, so
+# the top half scrolls up and the bottom half scrolls down - which is where
+# the Joy-Con profile had these, on SL and SR.
+GRID_SIZE = 1 2
+T1 = SCROLLUP              # Touchpad top half    - Zoom in / next weapon
+T2 = SCROLLDOWN            # Touchpad bottom half - Zoom out / prev weapon
 
 # Stick bindings
 LUP = W                    # Movement

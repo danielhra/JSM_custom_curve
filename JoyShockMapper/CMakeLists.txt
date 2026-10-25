@@ -220,14 +220,17 @@ if(SDL OR NOT DEFINED SDL)
 		# This is the macOS stand-in for HidHide on Windows.
 		set(_jsm_hidapi "${SDL3_SOURCE_DIR}/src/hidapi/SDL_hidapi.c")
 		file(READ "${_jsm_hidapi}" _jsm_hidapi_src)
+		# Seize by default, but allow it to be turned off at runtime: seizing
+		# detaches macOS' own HID stack from the device, and that is a
+		# candidate cause of the system dropping the Bluetooth link as idle.
 		string(REPLACE "hid_darwin_set_open_exclusive(0);"
-		               "hid_darwin_set_open_exclusive(1);"
+		               "hid_darwin_set_open_exclusive(SDL_getenv(\"JSM_DISABLE_HID_SEIZE\") ? 0 : 1);"
 		               _jsm_hidapi_new "${_jsm_hidapi_src}")
 		if (NOT _jsm_hidapi_src STREQUAL _jsm_hidapi_new)
 			file(WRITE "${_jsm_hidapi}" "${_jsm_hidapi_new}")
 			message(STATUS "Patched SDL for exclusive HID access (hides the controller from other apps)")
 		endif()
-		if (NOT _jsm_hidapi_new MATCHES "hid_darwin_set_open_exclusive\\(1\\);")
+		if (NOT _jsm_hidapi_new MATCHES "JSM_DISABLE_HID_SEIZE")
 			message(FATAL_ERROR "SDL exclusive-HID patch did not apply - check src/hidapi/SDL_hidapi.c upstream")
 		endif()
 	endif()
